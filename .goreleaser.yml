@@ -2,10 +2,13 @@ version: 2
 project_name: jira
 
 release:
+  github:
+    owner: anatolyD
+    name: jira-cli
   prerelease: auto
   name_template: "v{{.Version}}"
-  draft: true
-  mode: "keep-existing"
+  draft: false
+  mode: "replace"
 
 before:
   hooks:
@@ -61,7 +64,7 @@ checksum:
 
 brews:
   - name: jira-cli
-    homepage: "https://github.com/ankitpokhrel/jira-cli"
+    homepage: "https://github.com/anatolyD/jira-cli"
     description: "🔥 Feature-rich interactive Jira command-line"
     license: "MIT"
 
@@ -69,12 +72,12 @@ brews:
       - nix
 
     repository:
-      owner: ankitpokhrel
+      owner: anatolyD
       name: homebrew-jira-cli
 
     custom_block: |
       head do
-        url "https://github.com/ankitpokhrel/jira-cli.git", branch: "main"
+        url "https://github.com/anatolyD/jira-cli.git", branch: "main"
         depends_on "go"
       end
 
@@ -92,17 +95,14 @@ brews:
       assert_includes help_text, "Version=\"#{version}\""
 
     commit_author:
-      name: ankitpokhrel
-      email: oss@ankit.pl
+      name: anatolyD
+      email: adanilov.dev@gmail.com
 
     commit_msg_template: "Formula update for version {{ .Tag }}"
 
-    # Folder inside the repository to put the formula to.
     directory: Formula
 
-    # This will prevent goreleaser to actually try to commit the updated
-    # formula - leaving the responsibility of publishing it to the user.
-    skip_upload: true
+    skip_upload: false
 
 changelog:
   disable: true
