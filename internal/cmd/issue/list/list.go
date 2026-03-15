@@ -3,6 +3,7 @@ package list
 import (
 	"encoding/json"
 	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -37,6 +38,18 @@ $ jira issue list --paginate 20
 
 # Get 50 items starting from 10
 $ jira issue list --paginate 10:50
+
+# Fetch ALL issues (auto-paginate through all pages)
+$ jira issue list --paginate all
+
+# Use a saved Jira filter by ID
+$ jira issue list --filter 12345
+
+# Use a saved Jira filter by name
+$ jira issue list --filter "My Open Bugs"
+
+# Use a saved Jira filter and fetch all results
+$ jira issue list --filter 12345 --paginate all
 
 # Search for issues containing specific text
 $ jira issue list "Feature Request"
@@ -109,6 +122,27 @@ func loadList(cmd *cobra.Command, args []string) {
 		cmdutil.ExitIfError(cmd.Flags().Set("jql", searchQuery))
 	}
 
+	// Resolve filter name to ID if --filter is not numeric.
+	filterVal, _ := cmd.Flags().GetString("filter")
+	if filterVal != "" {
+		if _, numErr := strconv.Atoi(filterVal); numErr != nil {
+			client := api.DefaultClient(debug)
+			result, searchErr := client.FilterSearch(filterVal)
+			if searchErr != nil {
+				cmdutil.ExitIfError(fmt.Errorf("failed to search for filter %q: %w", filterVal, searchErr))
+			}
+			if len(result.Filters) == 0 {
+				cmdutil.Failed("No filter found with name %q", filterVal)
+				return
+			}
+			if len(result.Filters) > 1 {
+				fmt.Printf("Multiple filters found for %q, using first match: %s (ID: %s)\n",
+					filterVal, result.Filters[0].Name, result.Filters[0].ID)
+			}
+			cmdutil.ExitIfError(cmd.Flags().Set("filter", result.Filters[0].ID))
+		}
+	}
+
 	issues, err := func() ([]*jira.Issue, error) {
 		s := cmdutil.Info("Fetching issues...")
 		defer s.Stop()
@@ -118,7 +152,14 @@ func loadList(cmd *cobra.Command, args []string) {
 			return nil, err
 		}
 
-		resp, err := api.ProxySearch(api.DefaultClient(debug), q.Get(), q.Params().From, q.Params().Limit)
+		client := api.DefaultClient(debug)
+
+		var resp *jira.SearchResult
+		if q.Params().All {
+			resp, err = api.ProxySearchAll(client, q.Get(), q.Params().Limit)
+		} else {
+			resp, err = api.ProxySearch(client, q.Get(), q.Params().From, q.Params().Limit)
+		}
 		if err != nil {
 			return nil, err
 		}
@@ -236,9 +277,10 @@ func SetFlags(cmd *cobra.Command) {
 	cmd.Flags().String("created-before", "", "Filter by issues created before certain date")
 	cmd.Flags().String("updated-before", "", "Filter by issues updated before certain date")
 	cmd.Flags().StringP("jql", "q", "", "Run a raw JQL query in a given project context")
+	cmd.Flags().StringP("filter", "f", "", "Use a saved Jira filter by ID or name (e.g., --filter 12345 or --filter \"My Filter\")")
 	cmd.Flags().String("order-by", "created", "Field to order the list with")
 	cmd.Flags().Bool("reverse", false, "Reverse the display order (default \"DESC\")")
-	cmd.Flags().String("paginate", "0:100", "Paginate the result. Max 100 at a time, format: <from>:<limit> where <from> is optional")
+	cmd.Flags().String("paginate", "0:100", "Paginate the result. Use \"all\" to fetch all pages, or format: <from>:<limit> where <from> is optional")
 	cmd.Flags().Bool("plain", false, "Display output in plain mode")
 	cmd.Flags().Bool("no-headers", false, "Don't display table headers in plain mode. Works only with --plain")
 	cmd.Flags().Bool("no-truncate", false, "Show all available columns in plain mode. Works only with --plain")

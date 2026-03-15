@@ -100,7 +100,7 @@ func (sp *SprintParams) init(flags FlagParser) error {
 	if err != nil {
 		return err
 	}
-	from, limit, err := getPaginateParams(paginate)
+	from, limit, _, err := getPaginateParams(paginate)
 	if err != nil {
 		return err
 	}

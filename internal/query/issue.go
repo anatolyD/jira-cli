@@ -47,6 +47,15 @@ func splitPositiveNegative(labels []string) ([]string, []string) {
 
 // Get returns constructed jql query.
 func (i *Issue) Get() string {
+	// If a saved filter ID is specified, use it directly as the JQL.
+	if i.params.FilterID != "" {
+		jqlStr := fmt.Sprintf("filter = %s", i.params.FilterID)
+		if i.params.debug {
+			fmt.Printf("JQL: %s\n", jqlStr)
+		}
+		return jqlStr
+	}
+
 	var q *jql.JQL
 
 	defer func() {
@@ -188,7 +197,9 @@ type IssueParams struct {
 	Reverse       bool
 	From          uint
 	Limit         uint
+	All           bool
 	JQL           string
+	FilterID      string
 
 	debug bool
 }
@@ -231,9 +242,14 @@ func (ip *IssueParams) init(flags FlagParser) error {
 	if err != nil {
 		return err
 	}
-	from, limit, err := getPaginateParams(paginate)
+	from, limit, all, err := getPaginateParams(paginate)
 	if err != nil {
 		return err
+	}
+
+	filterID, err := flags.GetString("filter")
+	if err != nil {
+		filterID = ""
 	}
 
 	ip.setBoolParams(boolParamsMap)
@@ -242,6 +258,8 @@ func (ip *IssueParams) init(flags FlagParser) error {
 	ip.Status = status
 	ip.From = from
 	ip.Limit = limit
+	ip.All = all
+	ip.FilterID = filterID
 
 	return nil
 }
@@ -318,13 +336,13 @@ func addDay(dt time.Time, format string) string {
 	return dt.AddDate(0, 0, 1).Format(format)
 }
 
-func getPaginateParams(paginate string) (uint, uint, error) {
+func getPaginateParams(paginate string) (uint, uint, bool, error) {
 	var (
 		err         error
 		from, limit int
 
 		errInvalidPaginateArg = fmt.Errorf(
-			"invalid argument for paginate: must be a positive integer in format <from>:<limit>, where <from> is optional",
+			"invalid argument for paginate: must be \"all\" or a positive integer in format <from>:<limit>, where <from> is optional",
 		)
 		errOutOfBounds = fmt.Errorf(
 			"invalid argument for paginate: Format <from>:<limit>, where <from> is optional and "+
@@ -335,37 +353,41 @@ func getPaginateParams(paginate string) (uint, uint, error) {
 	paginate = strings.TrimSpace(paginate)
 
 	if paginate == "" {
-		return 0, defaultLimit, nil
+		return 0, defaultLimit, false, nil
+	}
+
+	if strings.EqualFold(paginate, "all") {
+		return 0, defaultLimit, true, nil
 	}
 
 	if !strings.Contains(paginate, ":") {
 		limit, err = strconv.Atoi(paginate)
 		if err != nil {
-			return 0, 0, errInvalidPaginateArg
+			return 0, 0, false, errInvalidPaginateArg
 		}
 	} else {
 		pieces := strings.Split(paginate, ":")
 		if len(pieces) != 2 {
-			return 0, 0, errInvalidPaginateArg
+			return 0, 0, false, errInvalidPaginateArg
 		}
 
 		from, err = strconv.Atoi(pieces[0])
 		if err != nil {
-			return 0, 0, errInvalidPaginateArg
+			return 0, 0, false, errInvalidPaginateArg
 		}
 
 		limit, err = strconv.Atoi(pieces[1])
 		if err != nil {
-			return 0, 0, errInvalidPaginateArg
+			return 0, 0, false, errInvalidPaginateArg
 		}
 	}
 
 	if from < 0 || limit <= 0 {
-		return 0, 0, errOutOfBounds
+		return 0, 0, false, errOutOfBounds
 	}
 	if limit > defaultLimit {
-		return 0, 0, errOutOfBounds
+		return 0, 0, false, errOutOfBounds
 	}
 
-	return uint(from), uint(limit), nil
+	return uint(from), uint(limit), false, nil
 }
