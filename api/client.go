@@ -144,6 +144,12 @@ func ProxySearch(c *jira.Client, jql string, from, limit uint) (*jira.SearchResu
 	return issues, err
 }
 
+// ProxySearchAll fetches all pages of search results using cursor-based pagination (v3).
+// Use this when --paginate all is specified.
+func ProxySearchAll(c *jira.Client, jql string, limit uint) (*jira.SearchResult, error) {
+	return c.SearchAll(jql, limit)
+}
+
 // ProxyAssignIssue uses either a v2 or v3 version of the PUT /issue/{key}/assignee
 // endpoint to assign an issue to the user.
 // Defaults to v3 if installation type is not defined in the config.
