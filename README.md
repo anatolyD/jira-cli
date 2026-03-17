@@ -27,34 +27,13 @@
         <i>Feature-rich Interactive Jira Command Line</i>
     </p>
     <img align="center" alt="JiraCLI Demo" src=".github/assets/demo.gif" /><br/><br/>
-    <p align="center">
-         <sub>
-            Financial support from private and corporate sponsors ensures the tool's continued development.<br/>
-            Please <a href="https://opencollective.com/jira-cli#backers">consider sponsoring the project</a> if you or your company rely on JiraCLI.
-         </sub><br/><br/>
-        <a href="https://opencollective.com/jira-cli#backers" target="_blank">
-            <img src="https://opencollective.com/jira-cli/backers.svg" alt="jira-cli open collective badge">
-        </a>
     </p>
-</div>
-
-<div>
-   <h2 align="center">Supporters</h2>
-   <p align="center">
-      <a href="https://www.atlassian.com?from=ankitpokhrel/jira-cli" target="_blank">
-         <img alt="Atlassian Logo" src=".github/assets/supporters/atlassian.png" />
-      </a><br/>
-      <a href="https://www.jetbrains.com/?from=ankitpokhrel/jira-cli" target="_blank">
-         <img alt="JetBrains Logo" src=".github/assets/supporters/jetbrains.png" />
-      </a>
-   </p>
 </div>
 
 JiraCLI is an interactive command line tool for Atlassian Jira that will help you avoid Jira UI to some extent. This
 tool may not be able to do everything, but it has all the essential features required to improve your day-to-day workflow with Jira.
 
-The tool started with the idea of making issue search and navigation as straightforward as possible. However, with the
-help of [outstanding supporters like you](#support-the-project), we evolved, and the tool now includes all necessary
+The tool started with the idea of making issue search and navigation as straightforward as possible. It now includes all necessary
 features like issue creation, cloning, linking, ticket transition, and much more.
 
 > This tool is heavily inspired by the [GitHub CLI](https://github.com/cli/cli)
@@ -826,24 +805,3 @@ Please [open a discussion](https://github.com/ankitpokhrel/jira-cli/discussions/
    make ci
    ```
 
-## Support the project
-Your suggestions and feedbacks are highly appreciated. Please feel free
-to [start a discussion](https://github.com/ankitpokhrel/jira-cli/discussions)
-or [create an issue](https://github.com/ankitpokhrel/jira-cli/issues/new) to share your experience with the tool or to
-discuss a feature/issue.
-
-If you think this tool is useful, saves you a lot of work, and lets you sleep much better, then consider supporting the
-project by any of the following means:
-
-- [Star the repo](https://github.com/ankitpokhrel/jira-cli/stargazers).
-- Spread the word by sharing the project on social media or with friends.
-- [Report bugs](https://github.com/ankitpokhrel/jira-cli/issues/new/choose)
-  or [propose solutions](https://github.com/ankitpokhrel/jira-cli/issues).
-- [Donate a small amount](https://opencollective.com/jira-cli#backers).
-
-<div>
-   <br/>
-   <p align="center">
-      <sub>Made with 💚</sub>
-   </p>
-</div>
