@@ -9,6 +9,7 @@ import (
 	"github.com/spf13/viper"
 
 	"github.com/ankitpokhrel/jira-cli/internal/cmd/board"
+	"github.com/ankitpokhrel/jira-cli/internal/cmd/checklist"
 	"github.com/ankitpokhrel/jira-cli/internal/cmd/completion"
 	"github.com/ankitpokhrel/jira-cli/internal/cmd/epic"
 	initCmd "github.com/ankitpokhrel/jira-cli/internal/cmd/init"
@@ -131,6 +132,7 @@ func addChildCommands(cmd *cobra.Command) {
 		issue.NewCmdIssue(),
 		epic.NewCmdEpic(),
 		sprint.NewCmdSprint(),
+		checklist.NewCmdChecklist(),
 		board.NewCmdBoard(),
 		project.NewCmdProject(),
 		open.NewCmdOpen(),
