@@ -186,7 +186,15 @@ func (j *JQL) Raw(q string) *JQL {
 	if hasProjectFilter(q) {
 		j.filters = j.filters[1:]
 	}
-	j.filters = append(j.filters, q)
+	// If the raw JQL contains ORDER BY, extract it and use it
+	// instead of the default to avoid duplicate ORDER BY clauses.
+	if parts, orderBy, ok := extractOrderBy(q); ok {
+		q = strings.TrimSpace(parts)
+		j.orderBy = orderBy
+	}
+	if q != "" {
+		j.filters = append(j.filters, q)
+	}
 	return j
 }
 
@@ -229,4 +237,14 @@ func hasProjectFilter(str string) bool {
 	regx := "(?i)((project)[\\s]*?={0,1}\\b)[^'.']"
 	m, _ := regexp.MatchString(regx, str)
 	return m
+}
+
+// extractOrderBy splits a JQL string into the filter part and the ORDER BY clause.
+func extractOrderBy(q string) (string, string, bool) {
+	re := regexp.MustCompile(`(?i)\s+ORDER\s+BY\s+`)
+	loc := re.FindStringIndex(q)
+	if loc == nil {
+		return q, "", false
+	}
+	return q[:loc[0]], strings.TrimSpace(q[loc[0]:]), true
 }
